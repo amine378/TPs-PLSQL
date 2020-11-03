@@ -126,17 +126,29 @@ END;
 DECLARE
     v_customer_Id CUSTOMERS.CUSTOMER_ID%TYPE;
     v_customer_name CUSTOMERS.NAME%TYPE;
+    CURSOR curs_Orders IS SELECT * FROM ORDERS WHERE CUSTOMER_ID = v_customer_Id;
+    TYPE orderTable IS TABLE OF curs_Orders%ROWTYPE;
+    v_orders_rec orderTable;
+    n Int := 0;
 BEGIN
+    OPEN curs_Orders;
     v_customer_Id :=: v_customer_Id;
     SELECT NAME INTO v_customer_name FROM CUSTOMERS WHERE CUSTOMER_ID = v_customer_Id;
     DBMS_OUTPUT.PUT_LINE('Customer ' || v_customer_name || ' has the following orders :');
 
-    FOR orderItr IN (SELECT *
-    FROM ORDERS
-    WHERE CUSTOMER_ID = v_customer_Id)
+
     LOOP
-        DBMS_OUTPUT.PUT_LINE(orderItr.ORDER_ID || ' ' || orderItr.STATUS || ' ' || orderItr.SALESMAN_ID || ' ' || orderItr.ORDER_DATE);
+        n := n+1;
+        FETCH curs_Orders INTO v_orders_rec(n);
+        EXIT WHEN curs_Orders%notfound;
     END LOOP;
+
+    CLOSE curs_Orders;
+
+    FOR orderItr IN curs_Orders
+        LOOP
+            DBMS_OUTPUT.PUT_LINE(orderItr.ORDER_ID || ' ' || orderItr.STATUS || ' ' || orderItr.SALESMAN_ID || ' ' || orderItr.ORDER_DATE);
+        end loop;
 EXCEPTION
     WHEN NO_DATA_FOUND THEN
         DBMS_OUTPUT.PUT_LINE('Customer with id ' || v_customer_id || ' not found ');
