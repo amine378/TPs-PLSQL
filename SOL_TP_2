@@ -1,0 +1,156 @@
+_____________________________________________________________________________________________________________________________
+--QUEST 1: -----------------------------------------------------
+
+SET SERVEROUTPUT ON;
+DECLARE
+c_emp EMPLOYEES%ROWTYPE;
+CURSOR c_employees is
+SELECT employee_id, first_name, last_name, job_title, hire_date, manager_id
+FROM employees;
+BEGIN
+    OPEN c_employees;
+    LOOP
+    FETCH c_employees 
+    into c_emp.employee_id, c_emp.first_name, c_emp.last_name, 
+    c_emp.job_title, c_emp.hire_date, c_emp.manager_id;
+        EXIT WHEN c_employees%notfound;
+        dbms_output.put_line('Employe ' || c_emp.first_name || ' ' || c_emp.last_name || ' (ID: ' || c_emp.employee_id || ' ) ' || 
+        ' travaille comme ' || c_emp.job_title || ' depuis ' || c_emp.hire_date || ' sous la direction de ' ||
+        c_emp.last_name || ' (matricule : ' || c_emp.manager_id || ' )');
+    END LOOP;
+    CLOSE c_employees;
+END;
+__________________________________________________________________________________________________________________________
+-- QUEST 2-1 :---------------------------------------------------------- 
+SET SERVEROUTPUT ON;
+DECLARE
+nbr_cmd NUMBER;
+cl_id number;
+cursor c_cust(varr number) is
+    SELECT COUNT(order_id) FROM ORDERS where CUSTOMER_ID = varr;
+BEGIN
+cl_id := &client;
+open c_cust(cl_id);
+fetch c_cust into nbr_cmd;
+ dbms_output.put_line('Le nombre de commandes est : ' || nbr_cmd);
+close c_cust;
+END;
+
+-- QUEST 2-2 : ----------------------------------------------------------
+
+SET SERVEROUTPUT ON;
+DECLARE
+nbr_vnt NUMBER;
+slm_id number;
+cursor c_emp(varr number) is
+    SELECT COUNT(order_id) FROM ORDERS where SALESMAN_ID = varr;
+BEGIN
+slm_id := &salesman;
+open c_emp(slm_id);
+fetch c_emp into nbr_vnt;
+ dbms_output.put_line('Le nombre de commandes est : ' || nbr_vnt);
+close c_emp;
+END;
+
+
+___________________________________________________________________________________________________________
+
+--QUEST 3: ----------------------------------------------------------------------------------------
+
+SET SERVEROUTPUT ON;
+DECLARE
+totall numeric;
+r_cust customers.customer_id%type;
+cursor c_cust is
+    SELECT customer_id,
+       SUM(unit_price * quantity) total
+FROM order_items
+INNER JOIN orders USING (order_id)
+WHERE status = 'Shipped'
+GROUP BY customer_id;
+i integer := 0;
+BEGIN
+OPEN c_cust;
+loop
+fetch c_cust into r_cust, totall;
+     if totall > 2000 then
+        update customers set credit_limit = credit_limit +50 where customer_id = r_cust;
+        i := i+1;
+    end if;
+end loop;
+    close c_cust;
+dbms_output.put_line('Le nombre de lignes mis a jour sont : ' || i);
+END;
+_____________________________________________________________________________________________________
+--QUEST 4: ---------------------------------------------------------------------------------------------
+SET SERVEROUTPUT ON;
+DECLARE
+totall numeric;
+r_cust customers.customer_id%type;
+cursor c_cust is
+    SELECT customer_id,
+       SUM(unit_price * quantity) total
+FROM order_items
+INNER JOIN orders USING (order_id)
+WHERE status = 'Shipped'
+GROUP BY customer_id;
+i integer := 0;
+BEGIN
+OPEN c_cust;
+loop
+fetch c_cust into r_cust, totall;
+     if totall > 10000 then
+        update customers set credit_limit = credit_limit +50 where customer_id = r_cust;
+        i := i+1;
+    end if;
+end loop;
+    close c_cust;
+dbms_output.put_line('Le nombre de lignes mis a jour sont : ' || i);
+END;
+
+-- QUEST 5 : ---------------------------------------------------------------------------------------
+
+set serveroutput on ;
+declare 
+tx float ;
+slm_id orders.salesman_id%type;
+date_1 orders.order_date%type;
+date_2 orders.order_date%type;
+cursor taux(nbr float, date_1 orders.order_date%type, date_2 orders.order_date%type) is
+select   (count(STATUS) / (select count(STATUS) from ORDERS where STATUS = 'Shipped'))*100 
+taux_vente from ORDERS where STATUS = 'Shipped' and SALESMAN_ID = nbr and order_date > date_1 and order_date < date_2 group by SALESMAN_ID;
+begin
+slm_id := &salesman_id;
+date_1 := '&date_1';
+date_1 := '&date_2';
+open taux(slm_id, date_1, date_2) ;
+fetch taux into tx ;
+dbms_output.put_line(tx);
+close  taux ;
+end ;
+
+-- QUEST 6 : -----------------------------------------------------------------------------------------------
+
+set serveroutput on ;
+declare 
+v_manag employees.manager_id%type;
+v_emp employees.employee_id%type;
+nbr integer;
+cursor c_manager(manag_id employees.manager_id%type) is
+    SELECT employee_id from employees where manager_id = manag_id;
+cursor c_slm(emp employees.employee_id%type) is
+    select count(*) from orders where salesman_id = emp;
+begin
+v_manag := &manager_id;
+open c_manager(v_manag);
+loop
+fetch c_manager into v_emp;
+end loop;
+close  c_manager ;
+    open c_slm(v_emp);
+    loop
+    fetch c_slm into nbr;
+    end loop;
+    close c_slm;
+dbms_output.put_line(nbr);
+end ;
