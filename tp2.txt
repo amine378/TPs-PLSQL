@@ -1,0 +1,94 @@
+********************************************** exercice 1 ********************************************************
+
+SET SERVEROUTPUT ON; 
+DECLARE
+  v_a varchar2(30);
+CURSOR listeEmployes IS SELECT* FROM EMPLOYEES  ;
+ v_maliste listeEmployes%ROWTYPE ;
+BEGIN
+ OPEN listeEmployes ;
+ FETCH listeEmployes INTO v_maliste ;
+ 
+ WHILE(listeEmployes%FOUND) LOOP
+ if v_maliste.MANAGER_ID is not null then
+ select employees.first_name into v_a FROM EMPLOYEES where employees.employee_id=v_maliste.MANAGER_ID;
+ else v_a:= ' null';
+ end if ;
+ DBMS_OUTPUT.PUT_LINE('employé ' || listeEmployes%ROWCOUNT ||'  s appelle ' || v_maliste.FIRST_NAME|| ' ' ||v_maliste.LAST_NAME||'travaille comme '||v_maliste.JOB_TITLE||'depuis'|| v_maliste.HIRE_DATE||'sous la direction de  '||v_a ) ;
+ FETCH listeEmployes INTO v_maliste ;
+ END LOOP ;
+ CLOSE listeEmployes ;
+END ;
+
+********************************************** exercice 2 *******************************************************  
+---------------  partie 1: --------------------------
+
+set SERVEROUTPUT ON;
+DECLARE
+    cursor cst_ord(int_id number) is select count(ORDER_ID) from ORDERS where CUSTOMER_ID=int_id;
+    ord number;
+    v_a number;
+       
+BEGIN
+    ord:= &ord;
+    open cst_ord(ord);
+    fetch cst_ord into v_a;
+        dbms_output.put_line('le nombre de commande d’un client est: '||v_a);
+    close cst_ord;
+END;
+
+-----------------  partie 2: -----------------------
+
+set SERVEROUTPUT ON;
+DECLARE
+   
+    cursor cst_ord(int_id number) is select count(ORDER_ID) from ORDERS where salesman_id=int_id;
+    v_a number;
+    ord number;
+
+BEGIN
+    ord:= &ord;
+    open cst_ord(ord);
+    fetch cst_ord into v_a;
+        dbms_output.put_line('le nombre de commande de cet employé est: '||v_a);
+       close cst_ord;
+END;
+
+
+********************************************* exercice 3 ************************************************************
+
+SET SERVEROUTPUT ON;    
+
+DECLARE
+      CURSOR c_cus is
+      SELECT CUSTOMER_ID , SUM(QUANTITY*UNIT_PRICE) FROM orders INNER JOIN order_items USING( order_id ) group by customer_id having SUM(QUANTITY*UNIT_PRICE) > 2000;
+      num integer:=0;
+    
+BEGIN 
+ for i in c_cus 
+ loop
+   update customers set CREDIT_LIMIT=CREDIT_LIMIT+50 where CUSTOMER_ID = i.CUSTOMER_ID;
+   num:=num+1;
+   end loop;
+   DBMS_OUTPUT.PUT_LINE('Le nombre de  ligne ayant été mise à jour est :' || num);
+END;
+
+
+********************************************* exercice 4 ************************************************************
+ 
+SET SERVEROUTPUT ON;    
+
+DECLARE
+      CURSOR c_cus is
+      SELECT CUSTOMER_ID , SUM(QUANTITY*UNIT_PRICE) FROM orders INNER JOIN order_items USING( order_id ) group by customer_id having SUM(QUANTITY*UNIT_PRICE) > 10000;
+      num integer:=0;
+    
+BEGIN 
+ for i in c_cus 
+ loop
+   update customers set CREDIT_LIMIT=CREDIT_LIMIT+50 where CUSTOMER_ID = i.CUSTOMER_ID;
+   num:=num+1;
+   end loop;
+   DBMS_OUTPUT.PUT_LINE('Le nombre de  ligne ayant été mise à jour est :' || num);
+END;
+
