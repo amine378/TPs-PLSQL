@@ -191,25 +191,25 @@ BEGIN
   
 
   if r_emp.manager_id is not NULL then
-     DBMS_OUTPUT.PUT_LINE('Son manager est  ');
+			     DBMS_OUTPUT.PUT_LINE('Son manager est  ');
 
-  select *
-  into r_mgr
-  from employees
-  where employees.employee_id = r_emp.manager_id;
-  
+			  select *
+			  into r_mgr
+			  from employees
+			  where employees.employee_id = r_emp.manager_id;
+			  
 
-  
-  DBMS_OUTPUT.PUT_LINE('manager s first name  ' || r_mgr.first_name );
-  DBMS_OUTPUT.PUT_LINE('manager  s LAST_NAME  ' || r_mgr.LAST_NAME );
-  DBMS_OUTPUT.PUT_LINE('manager  s EMAIL      ' || r_mgr.EMAIL );
-  DBMS_OUTPUT.PUT_LINE('manager  s PHONE  ' || r_mgr.PHONE );
-  DBMS_OUTPUT.PUT_LINE('manager  s HIRE_DATE  ' || r_mgr.HIRE_DATE );
-  DBMS_OUTPUT.PUT_LINE('manager  s Job title  ' || r_mgr.JOB_TITLE );
-  
- 
-  else 
-   DBMS_OUTPUT.PUT_LINE(' He s the manager ');
+			  
+			  DBMS_OUTPUT.PUT_LINE('manager s first name  ' || r_mgr.first_name );
+			  DBMS_OUTPUT.PUT_LINE('manager  s LAST_NAME  ' || r_mgr.LAST_NAME );
+			  DBMS_OUTPUT.PUT_LINE('manager  s EMAIL      ' || r_mgr.EMAIL );
+			  DBMS_OUTPUT.PUT_LINE('manager  s PHONE  ' || r_mgr.PHONE );
+			  DBMS_OUTPUT.PUT_LINE('manager  s HIRE_DATE  ' || r_mgr.HIRE_DATE );
+			  DBMS_OUTPUT.PUT_LINE('manager  s Job title  ' || r_mgr.JOB_TITLE );
+			  
+			 
+			  else 
+			   DBMS_OUTPUT.PUT_LINE(' He s the manager ');
 end if;
    
   
@@ -224,35 +224,32 @@ END;
 
 
 
-
-
-
-
 SET SERVEROUTPUT ON;
 
 DECLARE
+     
+/******* curseur ********/
      cursor cusRec is select customer_id , name from customers ;
      cursor ordCur is select order_id ,customer_id from orders;
+/******* record ********/
      ordRec orders%rowtype;
-     v_ord_id orders.order_id%type;
-     
+/******* collection ********/
      type v_list is table of customers.customer_id%type index by binary_integer;
- 
      id_list v_list;
-
+/***** autre **************/
+     v_ord_id orders.order_id%type;
      counter integer := 0;
-     var1 integer := 0 ;
- 
-  
+     var1 integer := 0 ; 
 BEGIN
              for n in cusRec LOOP
                          counter := counter + 1;
                          id_list(counter) := n.customer_id;    
-                         dbms_output.put_line('customer('||counter||'):'||id_list(counter)|| ' ' ||n.name );
+                         
                           var1 :=0;
                           select count(*) into var1 from orders where customer_id=n.customer_id; 
                                     for m in ordCur LOOP
                                         if n.customer_id=m.customer_id then
+                                        dbms_output.put_line('customer('||counter||'):'||id_list(counter)|| ' ' ||n.name );
                                         select * into ordRec from orders where order_id=m.order_id;
                                               DBMS_OUTPUT.PUT_LINE('++++++++++++++++++++++' );
                                               DBMS_OUTPUT.PUT_LINE('ORDER_ID  ' ||ordRec.order_id );
@@ -263,7 +260,7 @@ BEGIN
                                         end if;
                                     
                                     end loop;   
-                                        DBMS_OUTPUT.PUT_LINE('------------------------------------------' );
+                                       
                 end loop;
                          
 
