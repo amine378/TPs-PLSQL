@@ -88,83 +88,40 @@ DBMS_OUTPUT.PUT_LINE('Id of employee : ' || v_employee_order.employee_id || ' To
 END LOOP;
 END;
 -- Question 3 :
-
--- Méthode 1 :
-
-DECLARE
-total number :=0;
-BEGIN
-UPDATE customers
-SET credit_limit = credit_limit + 50
-WHERE credit_limit>2000;
-if sql%found then
-total  := sql%rowcount;
-DBMS_OUTPUT.PUT_LINE( total || '  customer updated ');
-else 
-DBMS_OUTPUT.PUT_LINE('No customer updated ');
-end if;
-END;
-
--- Méthode 2 :
-
-DECLARE
-CURSOR c_update IS SELECT * FROM CUSTOMERS WHERE credit_limit>2000;
+DECLARE 
+CURSOR c_update IS SELECT customers.customer_id ,SUM(order_items.quantity*order_items.unit_price) as total from customers join orders 
+on customers.customer_id=orders.customer_id join order_items on orders.order_id =order_items.order_id group by customers.customer_id;
 v_update c_update%ROWTYPE;
-total number :=0;
+v_total FLOAT;
+i NUMBER :=0;
 BEGIN
 FOR v_update IN c_update LOOP
-total := total+1;
+v_total:= v_update.total;
+IF v_total>2000 then
 UPDATE customers SET credit_limit =credit_limit+50 WHERE customer_id =v_update.customer_id;
-END LOOP;
-if total > 0  then
-DBMS_OUTPUT.PUT_LINE( total || '  customer updated ');
-else 
-DBMS_OUTPUT.PUT_LINE('No customer updated ');
+i:=i+1;
 end if;
+END LOOP;
+DBMS_OUTPUT.PUT_LINE(i);
 END;
 
 -- Question 4 : 
 
--- Méthode 1 :
-
-DECLARE
- erreur EXCEPTION;
-total number :=0;
-BEGIN
-UPDATE customers
-SET credit_limit = credit_limit + 50
-WHERE credit_limit>10000;
-if sql%found then
-total  := sql%rowcount;
-DBMS_OUTPUT.PUT_LINE( total || '  customer updated ');
-else 
-RAISE erreur;
-end if;
-EXCEPTION
-WHEN erreur THEN
-DBMS_OUTPUT.PUT_LINE('No customer updated');
-END;
-
--- Méthode 2 :
-
-DECLARE
-erreur EXCEPTION;
-CURSOR c_update IS SELECT * FROM CUSTOMERS WHERE credit_limit>10000;
+DECLARE 
+CURSOR c_update IS SELECT customers.customer_id ,SUM(order_items.quantity*order_items.unit_price) as total from customers join orders 
+on customers.customer_id=orders.customer_id join order_items on orders.order_id =order_items.order_id group by customers.customer_id;
 v_update c_update%ROWTYPE;
-total number :=0;
+v_total FLOAT;
+i NUMBER :=0;
 BEGIN
 FOR v_update IN c_update LOOP
-total := total+1;
-UPDATE customers SET credit_limit =credit_limit-50 WHERE customer_id =v_update.customer_id;
-END LOOP;
-if total > 0  then
-DBMS_OUTPUT.PUT_LINE( total || '  customer updated ');
-else 
-RAISE erreur;
+v_total:= v_update.total;
+IF v_total>10000 then
+UPDATE customers SET credit_limit =credit_limit+50 WHERE customer_id =v_update.customer_id;
+i:=i+1;
 end if;
-EXCEPTION
-WHEN erreur THEN
-DBMS_OUTPUT.PUT_LINE('No customer updated');
+END LOOP;
+DBMS_OUTPUT.PUT_LINE(i);
 END;
 
 -- Question 5 :
@@ -181,7 +138,7 @@ WHERE orders.order_date BETWEEN date1 AND date2
 group by employees.employee_id;
 v_employee c_employee%ROWTYPE;
 BEGIN
-SELECT count(*) INTO v_total_orders FROM orders ;
+SELECT count(*) INTO v_total_orders FROM orders WHERE orders.order_date BETWEEN date1 AND date2 ;
 if SIGN(date2-date1)>0  then
 FOR v_employee IN c_employee LOOP
 DBMS_OUTPUT.PUT_LINE(' EMPLOYEE ID : ' || v_employee.employee_id  || '  numbers of sales ' || v_employee.t || ' percentage of sales ' ||  
