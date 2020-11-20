@@ -80,3 +80,37 @@ dbms_output.put_line('le nombre de ligne affecte est '|| cmp);
 
 end;
 ---------------quest 5-------------------
+set serveroutput on;
+declare
+date_1 date := '&date1';
+date_2 date := '&date2';
+select count(*) from orders where order_date between date_1 and date_2;
+begin
+if sql%notfound then
+dbms_output.put_line('no result was founded');
+
+end if;
+dbms_output.put_line('le nombre d order realiser en les deux date est '||sql%rowcount );
+end;
+
+-------------quest 6-----------
+set serveroutput on;
+declare
+cursor c_employe (id_empl employees.id%type) is
+select * from employees where id=id.empl;
+v_id int ='&id';
+
+begin
+
+open c_employe(v_id);
+
+for it in c_employe(v_id);
+
+loop
+if it%notfound then
+dbms_output.put_line('no result was founded');
+end if;
+dbms_output.put_line('-----');
+end loop;
+
+end;
