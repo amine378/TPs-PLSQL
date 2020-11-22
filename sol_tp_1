@@ -3,12 +3,10 @@ DECLARE
 	v_nom varchar2(100);
 	v_prenom varchar2(100);
 BEGIN
-	dbms_output.put_line( 'entrez votre nom' );
-	v_nom := '$v_nom';
-  dbms_output.put_line( 'votre nom est : ' || v_nom );
-	dbms_output.put_line( 'entrez votre prenom' );
-	v_prenom := '$v_prenom';
-  dbms_output.put_line( 'votre prenom est : ' || v_prenom );
+	v_nom := '&v_nom';
+  	dbms_output.put_line( 'votre nom est : ' || v_nom );
+	v_prenom := '&v_prenom';
+  	dbms_output.put_line( 'votre prenom est : ' || v_prenom );
 END;
 
 -- 2 3 4
@@ -37,7 +35,7 @@ BEGIN
     SELECT LAST_NAME INTO v_last_name FROM employees WHERE  employee_id = v_employee_id; 
     SELECT FIRST_NAME INTO v_first_name FROM employees WHERE  employee_id = v_employee_id; 
     SELECT HIRE_DATE INTO v_hire_date FROM employees WHERE  employee_id = v_employee_id; 
-	dbms_output.put_line( '-le prenom est : ' || v_last_name || ' -le nom est : ' || v_first_name || ' -hire date est : ' || v_hire_date );
+    dbms_output.put_line( '-le prenom est : ' || v_last_name || ' -le nom est : ' || v_first_name || ' -hire date est : ' || v_hire_date );
 END;
 
 -- 6
@@ -111,8 +109,8 @@ DECLARE
  r_ord all_ord;
 BEGIN
    
- v_id := $v_id;
- SELECT * INTO r_cus FROM customers WHERE customer_id = 1;
+ v_id := &v_id;
+ SELECT * INTO r_cus FROM customers WHERE customer_id = v_id;
  SELECT * BULK COLLECT INTO r_ord FROM orders WHERE customer_id = r_cus.customer_id;
  -- SELECT * INTO r_ord FROM orders WHERE customer_id = r_cus.customer_id;
  for i in r_ord.first..r_ord.last loop
