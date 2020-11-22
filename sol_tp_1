@@ -83,10 +83,8 @@ r_manager EMPLOYEES%ROWTYPE;
 r_employee EMPLOYEES%ROWTYPE;
 
 BEGIN
-
- dbms_output.put_line ('entrez lid de l employee ');
- v_employee.id:= $v_employee_id;
-SELECT * INTO r_employee FROM EMPLOYEES WHERE EMPLOYEE_ID=  v_employee.id ;
+v_employee_id:= &v_employee_id;
+SELECT * INTO r_employee FROM EMPLOYEES WHERE EMPLOYEE_ID=  v_employee_id ;
 SELECT * INTO r_manager FROM EMPLOYEES WHERE EMPLOYEE_ID= r_employee.MANAGER_ID ; 
 
     dbms_output.put_line( 'first_name : ' || r_employee.first_name); 
@@ -95,7 +93,7 @@ SELECT * INTO r_manager FROM EMPLOYEES WHERE EMPLOYEE_ID= r_employee.MANAGER_ID 
     dbms_output.put_line( 'phone : ' || r_employee.phone); 
     dbms_output.put_line( 'hire date : ' || r_employee.hire_date); 
     dbms_output.put_line( 'job title: ' || r_employee.job_title); 
-
+    dbms_output.put_line( '--------------manager info--------------'); 
     dbms_output.put_line( 'first_name : ' || r_manager.first_name); 
     dbms_output.put_line( 'last_name : ' || r_manager.last_name); 
     dbms_output.put_line( 'email : ' || r_manager.email); 
