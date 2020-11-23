@@ -68,7 +68,7 @@ END IF;
 END LOOP;
 Total := c_sum%ROWCOUNT;
 CLOSE c_sum;
-DBMS_OUTPUT.PUT_LINE('Le nombre de lignes qui ont �taient mise � jour est : '||Total);
+DBMS_OUTPUT.PUT_LINE('Le nombre de lignes qui ont étaient mise à jour est : '||Total);
 END;
 -- QUESTION 4:
 SET SERVEROUTPUT ON
@@ -94,7 +94,7 @@ END IF;
 END LOOP;
 Total := c_sum%ROWCOUNT;
 CLOSE c_sum;
-DBMS_OUTPUT.PUT_LINE('Le nombre de lignes qui ont �taient mise � jour est : '||Total);
+DBMS_OUTPUT.PUT_LINE('Le nombre de lignes qui ont étaient mise à jour est : '||Total);
 END;
 --QUESTION5:
  SET SERVEROUTPUT ON
