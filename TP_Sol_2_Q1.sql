@@ -1,7 +1,7 @@
 DECLARE
-    v_ManagerName VARCHAR2(255);
-    r_Emp         EMPLOYEES%ROWTYPE;
-    ex_NullManagerID EXCEPTION;
+    v_ManagerName       VARCHAR2(255);
+    r_Emp               EMPLOYEES%ROWTYPE;
+    ex_NullManagerID    EXCEPTION;
     CURSOR c_EmployeeSummary IS
         SELECT * FROM EMPLOYEES;
     CURSOR c_ManagerLastName IS
@@ -22,13 +22,13 @@ BEGIN
                                  r_Emp.HIRE_DATE || ' sous la direction de ' || v_ManagerName || ' (Matricule: ' ||
                                  r_Emp.MANAGER_ID || ').');
             CLOSE c_ManagerLastName;
-            EXCEPTION
-                WHEN ex_NullManagerID THEN
-                    DBMS_OUTPUT.PUT_LINE('Employe ' || r_Emp.FIRST_NAME || ' ' || r_Emp.LAST_NAME || ' (ID: ' ||
-                                         r_Emp.EMPLOYEE_ID || ') travaille comme ' || r_Emp.JOB_TITLE || ' depuis ' ||
-                                         r_Emp.HIRE_DATE);
-                WHEN others THEN
-                    DBMS_OUTPUT.PUT_LINE('ERROR !');
+        EXCEPTION
+            WHEN ex_NullManagerID THEN
+                DBMS_OUTPUT.PUT_LINE('Employe ' || r_Emp.FIRST_NAME || ' ' || r_Emp.LAST_NAME || ' (ID: ' ||
+                                     r_Emp.EMPLOYEE_ID || ') travaille comme ' || r_Emp.JOB_TITLE || ' depuis ' ||
+                                     r_Emp.HIRE_DATE);
+            WHEN others THEN
+                DBMS_OUTPUT.PUT_LINE('ERROR !');
         END;
     END LOOP;
     CLOSE c_EmployeeSummary;
