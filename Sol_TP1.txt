@@ -1,0 +1,95 @@
+--_________________ANSSAIEN Ayat________
+--______1_______
+SET SERVEROUTPUT ON
+DECLARE
+ v_nom varchar(50);
+ v_prenom varchar(50);
+ v_nombre_employ int ;
+BEGIN
+v_nom :='&v_nom';
+v_prenom :='&v_prenom';
+dbms_output.put_line('nom :' || v_nom);
+dbms_output.put_line('prenom :' || v_prenom);
+END;
+--______2-3-4________
+DECLARE
+ v_nombre_employ int ;
+ v_nombre_employ_id int ;
+ v_nombre_employ_pctg int ;
+BEGIN
+ SELECT COUNT(*) INTO  v_nombre_employ FROM EMPLOYEES ;
+ SELECT COUNT(*) INTO v_nombre_employ_id  FROM EMPLOYEES WHERE MANAGER_ID = 1 ;
+  v_nombre_employ_pctg := v_nombre_employ_id/v_nombre_employ*100;
+  dbms_output.put_line ('le nombre des employees est : '|| v_nombre_employ);
+  dbms_output.put_line ('le nombre des employees est dont l id manager = 1 : '|| v_nombre_employ_id);
+  dbms_output.put_line ('La proportion est :'|| v_nombre_employ_pctg || '%' );
+  
+END;
+--_________5________
+DECLARE
+ v_last_name EMPLOYEES.LAST_NAME%TYPE;
+ v_first_name EMPLOYEES.FIRST_NAME%TYPE;
+ v_hire_date EMPLOYEES.HIRE_DATE%TYPE;
+ v_id EMPLOYEES.EMPLOYEE_ID%TYPE;
+BEGIN
+v_id := &v_id;
+SELECT LAST_NAME,FIRST_NAME,HIRE_DATE INTO  v_last_name,v_first_name,v_hire_date FROM EMPLOYEES WHERE EMPLOYEE_ID = v_id ;
+dbms_output.put_line ('le nom est : '|| v_last_name || ', le prenom est : '|| v_first_name || ', et HIRE DATE est :'|| v_hire_date);
+END;
+--___________6______
+DECLARE
+TYPE r_employee
+IS RECORD(
+ last_name EMPLOYEES.LAST_NAME%TYPE,
+ first_name EMPLOYEES.FIRST_NAME%TYPE,
+ hire_date EMPLOYEES.HIRE_DATE%TYPE,
+ v_id EMPLOYEES.EMPLOYEE_ID%TYPE );
+ employee r_employee;
+BEGIN
+ employee.v_id := &v_id;
+SELECT LAST_NAME,FIRST_NAME,HIRE_DATE INTO employee.last_name, employee.first_name, employee.hire_date  FROM EMPLOYEES WHERE EMPLOYEE_ID = employee.v_id ;
+ dbms_output.put_line ('le nom est : '|| employee.last_name || ', le prenom est : '|| employee.first_name || ', et HIRE DATE est :' || employee.hire_date );
+END;
+--________7______
+DECLARE
+ r_product PRODUCTS%ROWTYPE ;
+BEGIN
+ r_product.PRODUCT_ID := &v_id;
+
+SELECT * INTO r_product  FROM PRODUCTS WHERE PRODUCT_ID = r_product.PRODUCT_ID ;
+ dbms_output.put_line (r_product.PRODUCT_ID);
+END;
+--________8_____
+
+DECLARE
+ r_mgr EMPLOYEES%ROWTYPE;
+ r_emp EMPLOYEES%ROWTYPE;
+ v_test number(2);
+BEGIN 
+ r_emp.EMPLOYEE_ID:= &v_id_emp ;
+SELECT * INTO r_emp FROM EMPLOYEES WHERE EMPLOYEE_ID= r_emp.EMPLOYEE_ID ;
+r_mgr.EMPLOYEE_ID := r_emp.MANAGER_ID;
+dbms_output.put_line ('les information de l employe : ' ||  r_emp.FIRST_NAME ||' '|| r_emp.LAST_NAME||' '||r_emp.EMAIL||' '|| r_emp.PHONE||' '||r_emp.HIRE_DATE||' '||r_emp.MANAGER_ID||' '|| r_emp.JOB_TITLE  );
+
+ SELECT COUNT (*) into v_test FROM EMPLOYEES WHERE EMPLOYEE_ID= r_mgr.EMPLOYEE_ID;
+if v_test > 0 then -- manager existe 
+SELECT * INTO r_mgr FROM EMPLOYEES WHERE EMPLOYEE_ID= r_mgr.EMPLOYEE_ID ; 
+ dbms_output.put_line ('les information du manager  : ' ||  r_mgr.FIRST_NAME ||' '|| r_mgr.LAST_NAME||' '||r_mgr.EMAIL||' '|| r_mgr.PHONE||' '||r_mgr.HIRE_DATE||' '||r_mgr.MANAGER_ID||' '|| r_mgr.JOB_TITLE  );
+else 
+ dbms_output.put_line ('information du manager : "no data found "');
+end if ;
+END;
+--_______9______
+SET SERVEROUTPUT ON
+DECLARE
+r_ord orders%ROWTYPE;
+total number(2);
+TYPE  t_ord  is table of orders%ROWTYPE ; 
+tab_orders t_ord;
+BEGIN
+SELECT * bulk collect into  tab_orders FROM ORDERS WHERE customer_id =1 ;
+select count (*) into total from orders where customer_id = 1 ;
+for i in 1..total loop
+dbms_output.put_line (tab_orders(i).ORDER_ID ||' '|| tab_orders(i).STATUS||' '|| tab_orders(i).SALESMAN_ID ||' '|| tab_orders(i).ORDER_DATE );
+end loop ;
+END;
