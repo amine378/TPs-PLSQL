@@ -1,0 +1,136 @@
+--_________________ANSSAIEN Ayat________
+--__________________________1___________________________
+set SERVEROUTPUT ON
+DECLARE
+manager_name employees.last_name%TYPE;
+r_emp employees%ROWTYPE;
+
+CURSOR c_emp is 
+SELECT * FROM employees;
+
+BEGIN
+ OPEN c_emp ;
+ LOOP
+ fetch c_emp into r_emp ;
+--SELECT last_name INTO manager_name FROM employees WHERE employee_id = r_emp.MANAGER_ID ;
+ dbms_output.put_line('Employe'||r_emp.FIRST_NAME||' '||r_emp.LAST_NAME || '(ID :' || r_emp.EMPLOYEE_ID || ') travaille comme' || r_emp.JOB_TITLE || 'depuis' || r_emp.HIRE_DATE || 'sous la direction de -- manager_name -- (matricule :'|| r_emp.MANAGER_ID ||')' );
+ exit when c_emp%NOTFOUND;
+ END LOOP;
+ CLOSE c_emp;
+END;
+--____________________________2-1__________________________________
+
+set SERVEROUTPUT ON 
+DECLARE
+ n_dmd number(3);
+  n_vnt number(3);
+
+
+BEGIN
+SELECT COUNT (*) INTO n_dmd FROM orders where customer_id = 1 ; 
+dbms_output.put_line('le nombre de demande est : '||n_dmd);
+
+END;
+
+--____________________________2-2__________________________________
+set SERVEROUTPUT ON 
+DECLARE
+n_vnt number(3);
+v_salesman_id  employees.employee_id%TYPE;
+
+CURSOR c_salesman_id is
+SELECT DISTINCT salesman_id from orders ;
+
+BEGIN
+
+OPEN c_salesman_id ;
+LOOP
+FETCH c_salesman_id into v_salesman_id ;
+SELECT COUNT (*) INTO n_vnt FROM orders where salesman_id =  v_salesman_id;
+dbms_output.put_line('le nombre de vente de l employee (id = '|| v_salesman_id ||') est : '||n_vnt);
+
+exit when c_salesman_id%NOTFOUND;
+END LOOP; 
+CLOSE c_salesman_id;
+
+END;
+--____________________________3 Et 4 __________________________________
+set SERVEROUTPUT ON 
+DECLARE
+v_cust customers.customer_id%TYPE;
+v_prix NUMBER(36,4) NOT NULL := 0 ;
+ nombre_lignes number(4):= 0;
+ Cursor c_cust_prix is
+SELECT  orders.customer_id , SUM ( order_items.quantity * order_items.unit_price ) AS Prix_d_achat
+        FROM 
+            orders
+            INNER JOIN order_items
+            ON orders.order_id = order_items.order_id  
+        GROUP BY customer_id 
+        HAVING SUM ( order_items.quantity * order_items.unit_price ) >2000 ; -- or HAVING SUM ( order_items.quantity * order_items.unit_price ) > 10000 ;
+BEGIN
+OPEN c_cust_prix ;
+LOOP
+ fetch c_cust_prix  into v_cust , v_prix ;
+     UPDATE customers 
+     set CREDIT_LIMIT  = CREDIT_LIMIT + 50  
+     where customer_id = v_cust ;
+     nombre_lignes := nombre_lignes +1 ;
+ exit when c_cust_prix%NOTFOUND ;
+END LOOP ; 
+CLOSE c_cust_prix ;
+ dbms_output.put_line('le nombre des lignes : ' || nombre_lignes);
+END;
+--____________________________5__________________________________
+set SERVEROUTPUT ON 
+DECLARE
+ total  NUMBER(36,4) NOT NULL := 0 ;
+ total_person  NUMBER(36,4) NOT NULL := 0 ;
+ taux  NUMBER(36,2) NOT NULL := 0 ;
+ v_id orders.salesman_id%TYPE := 57;
+ Cursor c_taux is
+SELECT  orders.salesman_id , SUM ( order_items.quantity * order_items.unit_price ) AS nbr_vente 
+        FROM 
+            orders
+            INNER JOIN order_items
+            ON orders.order_id = order_items.order_id  
+        WHERE    orders.order_date BETWEEN  '20-JUN-13' AND '30-JUN-15'
+        GROUP BY salesman_id;
+BEGIN
+        for v in c_taux LOOP
+            total := total + v.nbr_vente;
+             IF v.salesman_id = v_id then
+               total_person := v.nbr_vente;
+             END IF ;  
+        END LOOP ; 
+ taux := (total_person/total)*100 ;
+ DBMS_OUTPUT.PUT_LINE('taux de vente de (id =' || v_id ||' ) est : ' || taux);
+END;
+--____________________________6__________________________________
+
+--SET SERVEROUTPUT ON
+--DECLARE 
+--v_id employees.manager_id%TYPE;
+--BEGIN
+--v_id := &id;
+--DBMS_OUTPUT.PUT_LINE('This string breakshere' || v_id );
+--END;
+
+SET SERVEROUTPUT ON
+DECLARE
+v_id  employees.manager_id%TYPE := &id ;
+total number(2) := 0;
+nombre number(2) := 0;
+CURSOR c_id_emp is
+SELECT employee_id from employees where manager_id = v_id ;
+BEGIN
+ FOR c IN c_id_emp LOOP
+ SELECT COUNT(*) INTO nombre  FROM orders where salesman_id = c.employee_id ;
+    total := total + nombre ;
+ END LOOP ;
+ if sql%found then 
+  dbms_output.put_line('le nombre de vente est ' || total );
+  else
+   dbms_output.put_line('manager_id ne exist pas' );
+ end if;
+END;
