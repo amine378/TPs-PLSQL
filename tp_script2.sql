@@ -136,7 +136,7 @@ BEGIN
 
         SELECT SUM(QUANTITY) INTO n FROM ORDERS JOIN ORDER_ITEMS
             ON ORDERS.ORDER_ID = ORDER_ITEMS.ORDER_ID
-            WHERE CUSTOMER_ID = idEmp;
+            WHERE SAlESMAN_ID = idEmp;
 
         IF n IS NOT NULL THEN
             cnt := cnt + n;
