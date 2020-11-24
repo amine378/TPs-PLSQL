@@ -3,7 +3,7 @@ DECLARE
     v_OrderID               NUMBER;
     v_OrdersTotalCost       NUMBER := 0;
     v_BonusCredit           NUMBER := 50;
-    v_OrderThreshold        NUMBER := 20000;
+    v_OrderThreshold        NUMBER := 100000;
     v_EditedRowsCount       NUMBER := 0;
     r_OrderItems            ORDER_ITEMS%ROWTYPE;
     CURSOR c_GetCustomerID  IS SELECT CUSTOMER_ID FROM CUSTOMERS;
