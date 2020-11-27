@@ -14,7 +14,6 @@ DECLARE
     CURSOR c_CheckNewLocationExist IS
         SELECT LOCATION_ID FROM LOCATIONS WHERE LOCATION_ID = r_UpdatedWarehouse.v_LocationID;
 
-
 BEGIN
     OPEN  c_CheckWarehouseIDExist;
     FETCH c_CheckWarehouseIDExist INTO v_WarehouseExist;
