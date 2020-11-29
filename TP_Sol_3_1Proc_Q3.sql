@@ -5,16 +5,20 @@ DECLARE
     CURSOR c_CheckWarehouseIDExist IS
         SELECT WAREHOUSE_ID FROM WAREHOUSES WHERE WAREHOUSE_ID = v_TargetWarehouseID;
 
+    PROCEDURE p_DeleteWarehouse(v_TargetWarehouseID IN NUMBER) IS
+    BEGIN
+        OPEN  c_CheckWarehouseIDExist;
+        FETCH c_CheckWarehouseIDExist INTO v_WarehouseExist;
+        CLOSE c_CheckWarehouseIDExist;
+
+        IF v_WarehouseExist IS NULL THEN
+            DBMS_OUTPUT.PUT_LINE('ERROR: Invalid Warehouse ID !!');
+        ELSE
+            DELETE FROM WAREHOUSES WHERE WAREHOUSE_ID = v_TargetWarehouseID;
+            DBMS_OUTPUT.PUT_LINE('DONE: Warehouse Deleted !!');
+        END IF;
+    END p_DeleteWarehouse;
+
 BEGIN
-    OPEN  c_CheckWarehouseIDExist;
-    FETCH c_CheckWarehouseIDExist INTO v_WarehouseExist;
-    CLOSE c_CheckWarehouseIDExist;
-
-    IF v_WarehouseExist IS NULL THEN
-        DBMS_OUTPUT.PUT_LINE('ERROR: Invalid Warehouse ID !!');
-
-    ELSE
-        DELETE FROM WAREHOUSES WHERE WAREHOUSE_ID = v_TargetWarehouseID;
-        DBMS_OUTPUT.PUT_LINE('DONE: Warehouse Deleted !!');
-    END IF;
+    p_DeleteWarehouse(v_TargetWarehouseID);
 END;

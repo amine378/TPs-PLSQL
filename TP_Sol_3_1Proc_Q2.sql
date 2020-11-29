@@ -14,31 +14,33 @@ DECLARE
     CURSOR c_CheckNewLocationExist IS
         SELECT LOCATION_ID FROM LOCATIONS WHERE LOCATION_ID = r_UpdatedWarehouse.v_LocationID;
 
-BEGIN
-    OPEN  c_CheckWarehouseIDExist;
-    FETCH c_CheckWarehouseIDExist INTO v_WarehouseExist;
-    CLOSE c_CheckWarehouseIDExist;
+    PROCEDURE p_UpdateWarehouseData(v_TargetWarehouseID IN NUMBER) IS
+    BEGIN
+        OPEN  c_CheckWarehouseIDExist;
+        FETCH c_CheckWarehouseIDExist INTO v_WarehouseExist;
+        CLOSE c_CheckWarehouseIDExist;
 
-    IF v_WarehouseExist IS NULL THEN
-        DBMS_OUTPUT.PUT_LINE('ERROR: Invalid Warehouse ID !!');
-
-    ELSE
-        r_UpdatedWarehouse.v_WarehouseName   :=: WAREHOUSE_NAME;
-        r_UpdatedWarehouse.v_LocationID      :=: LOCATION_ID;
-        OPEN  c_CheckNewLocationExist;
-        FETCH c_CheckNewLocationExist INTO v_NewLocationExist;
-        CLOSE c_CheckNewLocationExist;
-
-        IF v_NewLocationExist IS NULL THEN
-            DBMS_OUTPUT.PUT_LINE('ERROR: Invalid Location ID !!');
-
+        IF v_WarehouseExist IS NULL THEN
+            DBMS_OUTPUT.PUT_LINE('ERROR: Invalid Warehouse ID !!');
         ELSE
-            UPDATE WAREHOUSES
-            SET WAREHOUSE_NAME  = r_UpdatedWarehouse.v_WarehouseName,
-                LOCATION_ID     = r_UpdatedWarehouse.v_LocationID
-            WHERE WAREHOUSE_ID  = v_TargetWarehouseID;
-                DBMS_OUTPUT.PUT_LINE('DONE: Warehouse Updated !!');
+            r_UpdatedWarehouse.v_WarehouseName   :=: WAREHOUSE_NAME;
+            r_UpdatedWarehouse.v_LocationID      :=: LOCATION_ID;
+            OPEN  c_CheckNewLocationExist;
+            FETCH c_CheckNewLocationExist INTO v_NewLocationExist;
+            CLOSE c_CheckNewLocationExist;
 
+            IF v_NewLocationExist IS NULL THEN
+                DBMS_OUTPUT.PUT_LINE('ERROR: Invalid Location ID !!');
+            ELSE
+                UPDATE WAREHOUSES
+                SET WAREHOUSE_NAME  = r_UpdatedWarehouse.v_WarehouseName,
+                    LOCATION_ID     = r_UpdatedWarehouse.v_LocationID
+                WHERE WAREHOUSE_ID  = v_TargetWarehouseID;
+                    DBMS_OUTPUT.PUT_LINE('DONE: Warehouse Updated !!');
+            END IF;
         END IF;
-    END IF;
+    END p_UpdateWarehouseData;
+
+BEGIN
+    p_UpdateWarehouseData(v_TargetWarehouseID);
 END;
