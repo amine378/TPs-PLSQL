@@ -1,42 +1,48 @@
 DECLARE
     r_Warehouse             WAREHOUSES%ROWTYPE;
-    v_TargetLocationID      NUMBER :=: v_TargetLocationID;
+    v_TargetLocationID      NUMBER;
     v_LocationExist         NUMBER;
+    v_WarehouseExist        NUMBER;
 
-    CURSOR c_CheckLocationIDExist IS
-        SELECT LOCATION_ID FROM LOCATIONS WHERE LOCATION_ID = v_TargetLocationID;
-    CURSOR c_GetWarehousesInLocation IS
-        SELECT * FROM WAREHOUSES WHERE LOCATION_ID = v_TargetLocationID;
-
-    Procedure p_GetWarehousesInLocation(v_TargetLocationID IN NUMBER) IS
+    FUNCTION f_CheckLocationExist(v_LocationID IN NUMBER) RETURN NUMBER IS v_LocationExist NUMBER;
     BEGIN
-        OPEN  c_CheckLocationIDExist;
-        FETCH c_CheckLocationIDExist INTO v_LocationExist;
-        CLOSE c_CheckLocationIDExist;
+        SELECT COUNT(LOCATION_ID) INTO v_LocationExist FROM LOCATIONS WHERE LOCATION_ID = v_LocationID;
+        RETURN v_LocationExist;
+    END f_CheckLocationExist;
 
-        IF v_LocationExist IS NULL THEN
-            DBMS_OUTPUT.PUT_LINE('ERROR: Invalid Location ID !!');
+    FUNCTION f_CheckWarehouseExistInLocation(v_LocationID IN NUMBER) RETURN NUMBER IS v_WarehouseExist NUMBER;
+    BEGIN
+        SELECT COUNT(WAREHOUSE_ID) INTO v_WarehouseExist FROM WAREHOUSES WHERE LOCATION_ID = v_LocationID;
+        RETURN v_WarehouseExist;
+    END f_CheckWarehouseExistInLocation;
 
-        ELSE
-            DBMS_OUTPUT.PUT_LINE('---> LOCATION ID : ' || v_TargetLocationID);
-            OPEN  c_GetWarehousesInLocation;
-            FETCH c_GetWarehousesInLocation INTO r_Warehouse;
-
-            IF c_GetWarehousesInLocation%NOTFOUND THEN
-                DBMS_OUTPUT.PUT_LINE('There are no Warehouses in this Location.');
-
-            ELSE
-                LOOP
-                    DBMS_OUTPUT.PUT_LINE('Warehouse ID: ' || r_Warehouse.WAREHOUSE_ID ||
-                                         '.. Warehouse Name: ' || r_Warehouse.WAREHOUSE_NAME);
-                    FETCH c_GetWarehousesInLocation INTO r_Warehouse;
-                    EXIT WHEN c_GetWarehousesInLocation%NOTFOUND;
-                END LOOP;
-            END IF;
-            CLOSE c_GetWarehousesInLocation;
-        END IF;
-    END p_GetWarehousesInLocation;
+    Procedure p_PrintWarehousesInLocation(v_LocationID IN NUMBER) IS
+        CURSOR c_GetWarehousesInLocation IS
+            SELECT * FROM WAREHOUSES WHERE LOCATION_ID = v_LocationID;
+    BEGIN
+        OPEN c_GetWarehousesInLocation;
+        LOOP FETCH c_GetWarehousesInLocation INTO r_Warehouse;
+            EXIT WHEN c_GetWarehousesInLocation%NOTFOUND;
+            DBMS_OUTPUT.PUT_LINE('Warehouse ID: ' || r_Warehouse.WAREHOUSE_ID ||
+                                 '.. Warehouse Name: ' || r_Warehouse.WAREHOUSE_NAME);
+        END LOOP;
+        CLOSE c_GetWarehousesInLocation;
+    END p_PrintWarehousesInLocation;
 
 BEGIN
-    p_GetWarehousesInLocation(v_TargetLocationID);
+    v_TargetLocationID :=: Enter_Location_ID;
+    v_LocationExist := f_CheckLocationExist(v_TargetLocationID);
+
+    IF v_LocationExist = 0 THEN
+        DBMS_OUTPUT.PUT_LINE('ERROR: Invalid Location ID !!');
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('---> LOCATION ID : ' || v_TargetLocationID);
+        v_WarehouseExist := f_CheckWarehouseExistInLocation(v_TargetLocationID);
+
+        IF v_WarehouseExist = 0 THEN
+            DBMS_OUTPUT.PUT_LINE('There are no Warehouses in this Location.');
+        ELSE
+                p_PrintWarehousesInLocation(v_TargetLocationID);
+        END IF;
+    END IF;
 END;

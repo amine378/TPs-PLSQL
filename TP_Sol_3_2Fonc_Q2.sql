@@ -1,10 +1,9 @@
 DECLARE
     v_TotalPendingOrders   NUMBER;
 
-    FUNCTION f_CountPendingOrders RETURN NUMBER IS
-        v_TotalPendingOrders NUMBER;
+    FUNCTION f_CountPendingOrders RETURN NUMBER IS v_TotalPendingOrders NUMBER;
     BEGIN
-        SELECT count(ORDER_ID) INTO v_TotalPendingOrders FROM ORDERS WHERE STATUS = 'Pending';
+        SELECT COUNT(ORDER_ID) INTO v_TotalPendingOrders FROM ORDERS WHERE STATUS = 'Pending';
         RETURN v_TotalPendingOrders;
     END f_CountPendingOrders;
 
