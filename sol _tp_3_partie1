@@ -1,0 +1,161 @@
+-------exo1.1----------------------------
+SET SERVEROUTPUT ON
+declare 
+v_idlocation_a locations.location_id%TYPE;
+vef locations.location_id%TYPE;
+warehousename_a  warehouses.warehouse_name%TYPE ;
+warehouseid_a  warehouses.warehouse_id%TYPE ;
+PROCEDURE AJOUTWAREHOUSE( v_idlocation IN locations.location_id%TYPE , warehousename IN warehouses.warehouse_name%TYPE , warehouseid IN warehouses.warehouse_id%TYPE ) IS 
+BEGIN
+
+   select location_id into vef FROM locations
+      where location_id = v_idlocation;
+      if sql%notfound then 
+         DBMS_OUTPUT.PUT_LINE(' !!!!!!!!!!!!!!!!!!!locations not avalable in database !!!!!!!!!!!! ');
+      elsif sql%found then 
+          INSERT INTO warehouses(warehouse_id,warehouse_name,location_id ) values (warehouseid,warehousename,v_idlocation);
+          DBMS_OUTPUT.PUT_LINE('warehouse added succsesfully');
+          end if ;
+end;
+begin 
+   v_idlocation_a := '&v_idlocation';
+   warehousename_a := '&warehousename_a';
+    warehouseid_a := '&warehouseid_a';
+    AJOUTWAREHOUSE(v_idlocation_a ,warehousename_a , warehouseid_a);
+ end ;   
+----------------------- exo1.2--------------------------------
+SET SERVEROUTPUT ON
+declare 
+v_idlocation_a locations.location_id%TYPE;
+warehousename_a  warehouses.warehouse_name%TYPE ;
+warehouseid_a  warehouses.warehouse_id%TYPE ;
+w warehouses%ROWTYPE;
+PROCEDURE apdatewarehouse(v_idlocation in locations.location_id%TYPE,warehousename in warehouses.warehouse_name%TYPE , warehouseid in warehouses.warehouse_id%TYPE)IS 
+begin 
+UPDATE warehouses
+SET warehouse_id = warehouseid , warehouse_name = warehousename
+WHERE  location_id = v_idlocation ;
+if sql%found then 
+          DBMS_OUTPUT.PUT_LINE('location  updated succsesfully');
+elsif sql%notfound then 
+         DBMS_OUTPUT.PUT_LINE(' !!!!!!!!!!!!!!!!!!!locations not avalable in database !!!!!!!!!!!! ');
+end if ;
+end;
+
+  begin 
+ v_idlocation_a := '&v_idlocation';
+ warehousename_a := '&warehousename_a';
+ warehouseid_a := '&warehouseid_a';
+    apdatewarehouse(v_idlocation_a ,warehousename_a , warehouseid_a);
+select warehouse_id , warehouse_name into w.warehouse_id , w.warehouse_name 
+from warehouses
+where location_id = v_idlocation_a ;
+DBMS_OUTPUT.PUT_LINE( 'warehouse new  informations IDd '|| w.warehouse_id || w.warehouse_name);
+
+end ;
+--------------------------exoo1.3--------------------------
+SET SERVEROUTPUT ON
+declare 
+warehouseid_a  warehouses.warehouse_id%TYPE ;
+PROCEDURE deleteware(warehouseid in warehouses.warehouse_id%TYPE) is 
+begin 
+delete from warehouses 
+where warehouse_id = warehouseid;
+if sql%found then 
+          DBMS_OUTPUT.PUT_LINE('warehouse deleted succsesfully');
+elsif sql%notfound then 
+         DBMS_OUTPUT.PUT_LINE(' !!!!!!!!!!!!!!!!!!!warehouse not avalable in database !!!!!!!!!!!! ');
+end if ;
+end;
+begin 
+warehouseid_a := '&warehouseid_a';
+DBMS_OUTPUT.PUT_LINE('____________________________________');
+deleteware(warehouseid_a);
+end ;
+------------------------------exo1.4---------------------------------------
+SET SERVEROUTPUT ON
+declare 
+v_idlocation_a locations.location_id%TYPE;
+c_name warehouses.warehouse_name%TYPE ;
+c_id warehouses.warehouse_id%TYPE ;
+counter number  := 0;
+
+procedure afficheware(v_idlocation IN locations.location_id%TYPE) is 
+cursor c is 
+  select warehouse_id , warehouse_name from warehouses where location_id = v_idlocation ;
+begin 
+open c;
+loop
+fetch c into c_id ,c_name ;
+   exit when c%notfound;
+   counter := counter +1 ;
+   DBMS_OUTPUT.PUT_LINE('les données du warehouse n°'|| counter|| '::' || c_id || '//' ||c_name );
+end loop;
+close c;
+end;
+begin 
+v_idlocation_a := '&v_idlocation_a';
+ afficheware(v_idlocation_a);
+ end;
+-------------exo1.5------------------------------
+-----------------------exo2.1--------------------------------------------
+
+SET SET SERVEROUTPUT ON;
+declare
+v_idcust  customers.customer_id%type;
+   function TOTALPRICE(c_id in customers.customer_id%type)
+    RETURN number as 
+    counter number := 0;
+       cursor c_order is 
+       select order_id  from orders 
+       where customer_id = c_id ; 
+       total number := 0;
+       total_f number := 0;
+       nub number := 0;
+       cursor c_price is 
+       select unit_price , quantity , order_id 
+             from order_items;
+       begin
+  
+     for n in c_order loop
+            if n.order_id is not null then
+              for m IN c_price loop
+                if m.order_id is not null then 
+                  if m.order_id = n.order_id then 
+                    total :=  ( m.unit_price * m.quantity)  ;
+                      nub := nub + 1 ;
+                      total_f := total_f + total;
+                       DBMS_OUTPUT.PUT_LINE('le prix de l order n °' ||nub || '::'||  ' prix **'||total);
+                  end if ;
+                  end if;
+              end loop;
+            end if;
+     end loop;
+         DBMS_OUTPUT.PUT_LINE('**************le nombre total de commande est : '|| nub);
+         return total_f;
+end;         
+
+
+begin 
+v_idcust := '&v_idcust';
+DBMS_OUTPUT.PUT_LINE('le prix total des ordres est ' || TOTALPRICE(v_idcust));
+end;
+----------------------exo2.2-------------------------------------------------------
+SET SERVEROUTPUT ON;
+declare
+  function nbrestatut return number as 
+    counter number := 1 ;
+    cursor c_statut is 
+     select order_id  from orders 
+     where status = 'Pending';
+  begin
+      for n in c_statut loop 
+      counter := counter + 1 ;
+      end loop;
+       return counter;
+  end;
+begin
+   DBMS_OUTPUT.PUT_LINE('le nombre total de commande avec statut pending est : ' || nbrestatut);
+end;     
+     ---------------------------------exo3.1-----------------------------------------
+	 
