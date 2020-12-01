@@ -1,0 +1,248 @@
+//
+//  sol_tp_3.sql
+//  Devoir
+//
+//  Created by Naoufal ACHAHBAR on 29/11/2020.
+//  Copyright © 2020 Naoufal ACHAHBAR. All rights reserved.
+//
+
+--------Procédures
+/* question 1 : */
+
+DECLARE
+    r_warehouse WAREHOUSES%ROWTYPE;
+    v_location_id NUMBER;
+    
+    CURSOR c_location_test IS
+    SELECT LOCATION_ID FROM LOCATIONS WHERE LOCATION_ID = r_warehouse.LOCATION_ID;
+    
+    PROCEDURE ajout_warehouse(r_warehouse in WAREHOUSES%ROWTYPE) IS
+    BEGIN
+    INSERT INTO WAREHOUSES VALUES ( r_warehouse.WAREHOUSE_ID,
+                                    r_warehouse.WAREHOUSE_NAME,
+                                    r_warehouse.LOCATION_ID);
+    END ajout_warehouse;
+    
+BEGIN
+    r_warehouse.WAREHOUSE_ID :=: WAREHOUSE_ID;
+    r_warehouse.WAREHOUSE_NAME :=: WAREHOUSE_NAME;
+    r_warehouse.LOCATION_ID :=: LOCATION_ID;
+    
+    OPEN c_location_test;
+    FETCH c_location_test INTO v_location_id;
+    IF v_location_id is NULL THEN
+        dbms_output.put_line('NO DATA FOUND! ');
+    else
+        ajout_warehouse(r_warehouse);
+        dbms_output.put_line('DATA CREATED! ');
+    END IF;
+    CLOSE c_location_test;
+    
+END;
+
+
+/* question 2 : */
+
+DECLARE
+    r_warehouse WAREHOUSES%ROWTYPE;
+    n_LOCATION_ID NUMBER;
+    
+    CURSOR check_location IS
+    SELECT LOCATION_ID FROM WAREHOUSES WHERE LOCATION_ID = r_warehouse.LOCATION_ID;
+    
+    PROCEDURE update_warehouse (n_LOCATION_ID IN NUMBER) IS
+    BEGIN
+    UPDATE WAREHOUSES
+    SET WAREHOUSE_ID = r_warehouse.WAREHOUSE_ID, WAREHOUSE_NAME = r_warehouse.WAREHOUSE_NAME
+    WHERE LOCATION_ID = r_warehouse.LOCATION_ID;
+    END update_warehouse;
+    
+BEGIN
+    r_warehouse.LOCATION_ID :=: LOCATION_ID;
+    OPEN check_location;
+    FETCH check_location INTO n_LOCATION_ID;
+    IF n_LOCATION_ID is NULL THEN
+        dbms_output.put_line('NO DATA FOUND! ');
+    ELSE
+        WAREHOUSE_ID :=: r_warehouse.WAREHOUSE_ID;
+        WAREHOUSE_NAME :=: r_warehouse.WAREHOUSE_NAME;
+        update_warehouse(n_LOCATION_ID);
+        dbms_output.put_line('DATA UPDATED! ');
+    END IF;
+    CLOSE check_location;
+END;
+
+
+/* question 3 : */
+
+DECLARE
+    n_WAREHOUSE_ID NUMBER;
+    test_WAREHOUSE_ID NUMBER;
+    
+    CURSOR check_warehouse IS
+    SELECT WAREHOUSE_ID FROM WAREHOUSES WHERE WAREHOUSE_ID = n_WAREHOUSE_ID;
+    
+    PROCEDURE delete_warehouse(n_WAREHOUSE_ID IN NUMBER) IS
+    BEGIN
+        OPEN check_warehouse;
+        FETCH check_warehouse INTO test_WAREHOUSE_ID;
+        IF test_WAREHOUSE_ID IS NULL THEN
+            dbms_output.put_line('NO DATA FOUND!');
+        ELSE
+            DELETE FROM WAREHOUSES WHERE WAREHOUSE_ID = n_WAREHOUSE_ID;
+            dbms_output.put_line('DATA DELETED!');
+        END IF;
+    END delete_warehouse;
+    
+BEGIN
+    n_WAREHOUSE_ID :=: WAREHOUSE_ID;
+    delete_warehouse(n_WAREHOUSE_ID);
+END;
+
+
+/* question 4 : */
+
+DECLARE
+    r_WAREHOUSES WAREHOUSES%ROWTYPE;
+    n_LOCATION_ID NUMBER;
+    test_LOCATION_ID NUMBER;
+    
+    CURSOR check_warehouse IS
+    SELECT LOCATION_ID FROM WAREHOUSES WHERE LOCATION_ID = n_LOCATION_ID;
+    
+    PROCEDURE list_warehouse(n_LOCATION_ID IN NUMBER) IS
+    BEGIN
+        OPEN check_warehouse;
+        FETCH check_warehouse INTO test_LOCATION_ID;
+        IF test_LOCATION_ID IS NULL THEN
+            dbms_output.put_line('NO DATA FOUND!');
+        ELSE
+            dbms_output.put_line('WAREHOUSE ID : ' || r_WAREHOUSES.WAREHOUSE_ID || 'WAREHOUSE NAME : ' || r_WAREHOUSES.WAREHOUSE_NAME);
+        END IF;
+    END list_warehouse;
+    
+BEGIN
+    n_LOCATION_ID :=: n_LOCATION_ID;
+    list_warehouse(n_LOCATION_ID);
+END;
+
+
+/* question 5 : */
+
+
+
+
+
+
+--------Fonctions
+
+
+/* question 1 : */
+
+DECLARE
+    v_id NUMBER :=: CUSTOMER_ID;
+    v_prix_total NUMBER;
+    
+    FUNCTION calcu_prix(cust_id IN NUMBER)
+    RETURN NUMBER
+    IS
+        prix_total NUMBER;
+    BEGIN
+    SELECT SUM(UNIT_PRICE) INTO prix_total
+    FROM (ORDERS INNER JOIN ORDER_ITEMS ON ORDERS.ORDER_ID=ORDER_ITEMS.ORDER_ID)
+    INNER JOIN CUSTOMERS ON  CUSTOMERS.CUSTOMER_ID=ORDERS.CUSTOMER_ID
+    WHERE CUSTOMER_ID=cust_id;
+    RETURN prix_total;
+    END;
+    
+BEGIN
+    v_prix_total := calcu_prix(v_id);
+    dbms_output.put_line(v_prix_total);
+    
+END;
+
+
+/* question 2 : */
+
+DECLARE
+    v_numb_commande NUMBER;
+    
+    FUNCTION nb_commande()
+    RETURN NUMBER
+    IS
+        numb_commande NUMBER;
+    BEGIN
+    SELECT COUNT(ORDER_ID) INTO numb_commande FROM ORDERS WHERE STATUS='Pending';
+    RETUN numb_commande;
+    END;
+    
+BEGIN
+    v_numb_commande := nb_commande();
+    dbms_output.put_line(v_numb_commande);
+    
+END;
+
+
+
+--------Fonctions
+
+
+/* question 1 : */
+
+CREATE OR REPLACE TRIGGER resume
+    AFTER INSERT ON ORDERS
+    FOR EACH ROW
+DECLARE
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('Order ID      : ' || :new.ORDER_ID);
+    DBMS_OUTPUT.PUT_LINE('Customer ID   : ' || :new.CUSTOMER_ID);
+    DBMS_OUTPUT.PUT_LINE('Status ID     : ' || :new.STATUS);
+    DBMS_OUTPUT.PUT_LINE('Salesman ID   : ' || :new.SALESMAN_ID);
+    DBMS_OUTPUT.PUT_LINE('Order Date    : ' || :new.ORDER_DATE);
+    DBMS_OUTPUT.PUT_LINE('*************************************');
+END;
+
+
+/* question 2 : */
+
+CREATE OR REPLACE TRIGGER alert
+	AFTER INSERT ON INVENTORIES
+	WHEN(:new.quantity <10)
+	FOR EACH ROW
+DECLARE
+BEGIN
+	DBMS_OUTPUT.PUT_LINE('ERROR! ');
+END;
+
+
+/* question 3 : */
+
+
+
+
+/* question 4 : */
+
+CREATE OR REPLACE TRIGGER test
+	BEFORE INSERT ON EMPLOYEES
+	WHEN(:new.hire_date < sysdate)
+	FOR EACH ROW
+DECLARE
+BEGIN
+	DBMS_OUTPUT.PUT_LINE('ERROR! ');
+END;
+
+
+/* question 5 : */
+
+CREATE OR REPLACE TRIGGER remise
+	AFTER INSERT ON ORDER_ITEMS
+	WHEN(:new.unit_price >10000)
+	FOR EACH ROW
+DECLARE
+BEGIN
+	UPDATE ORDER_ITEMS SET unit_price =unit_price*(0.95);
+end;
+
+
+
+
